@@ -3,8 +3,8 @@ function TasksViewModel() {
     // so that callbacks, which may have a different this, can use it
     var self = this;
     self.tasksURI = 'http://localhost:5000/todo/api/v1.0/tasks'
-    self.username = 'xiang'
-    self.password = 'python'
+    self.username = ''
+    self.password = ''
     self.tasks = ko.observableArray();
 
     self.ajax = function(uri, method, data) {
@@ -64,16 +64,30 @@ function TasksViewModel() {
         });
     }
 
-    self.ajax(self.tasksURI, 'GET').done(function(data) {
-        for (var i = 0; i < data.tasks.length; i++) {
-            self.tasks.push({
-                uri: ko.observable(data.tasks[i].uri),
-                title: ko.observable(data.tasks[i].title),
-                description: ko.observable(data.tasks[i].description),
-                done: ko.observable(data.tasks[i].done)
-            });
-        } 
-    });
+    self.beginLogin = function() {
+        $("#login").modal('show');
+    }
+    self.login = function(username, password) {
+        self.username = username;
+        self.password = password;
+        self.ajax(self.tasksURI, 'GET').done(function(data) {
+            for (var i = 0; i < data.tasks.length; i++) {
+                self.tasks.push({
+                    uri: ko.observable(data.tasks[i].uri),
+                    title: ko.observable(data.tasks[i].title),
+                    description: ko.observable(data.tasks[i].description),
+                    done: ko.observable(data.tasks[i].done)
+                });
+            }
+        }).fail(function(jqXHR) {
+            if (jqXHR.status == 403) {
+                setTimeout(self.beginLogin, 500);
+            }
+        });
+    }
+
+    self.beginLogin();
+
 }
 
 function AddTaskViewModel() {
@@ -116,9 +130,23 @@ function EditTaskViewModel() {
     }
 }
 
+function LoginViewModel() {
+    var self = this;
+    self.username = ko.observable();
+    self.password = ko.observable();
+
+    self.login = function() {
+        $("#login").modal('hide');
+        tasksViewModel.login(self.username(), self.password());
+    }
+}
+
 var tasksViewModel = new TasksViewModel();
 var addTaskViewModel = new AddTaskViewModel();
+var editTaskViewModel = new EditTaskViewModel();
+var loginViewModel = new LoginViewModel();
 ko.applyBindings(tasksViewModel, $("#main")[0]);
 ko.applyBindings(addTaskViewModel, $("#add")[0]);
-
+ko.applyBindings(editTaskViewModel, $('#edit')[0]);
+ko.applyBindings(loginViewModel, $('#login')[0]);
 
