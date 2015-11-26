@@ -4,8 +4,10 @@
 Flask app
 """
 from flask import Flask, jsonify, abort, make_response, request, url_for
+from flask.ext.httpauth import HTTPBasicAuth
 
 app = Flask(__name__)
+auth = HTTPBasicAuth()
 
 tasks = [
     {
@@ -32,6 +34,7 @@ def index():
 
 
 @app.route('/todo/api/v1.0/tasks', methods=['GET'])
+@auth.login_required
 def get_tasks():
     """
     GET method api to get all tasks
@@ -136,6 +139,18 @@ def make_public_task(task):
         else:
             new_task[field] = task[field]
     return new_task
+
+
+@auth.get_password
+def get_password(username):
+    if username == 'xiang':
+        return 'python'
+    return None
+
+
+@auth.error_handler
+def unauthorized():
+    return make_response(jsonify({'error': 'Unauthorized access'}), 403)
 
 if __name__ == "__main__":
     app.run(debug=True)
