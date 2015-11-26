@@ -2,20 +2,32 @@ function TasksViewModel() {
     // idiom in JS functions, save the original value of this
     // so that callbacks, which may have a different this, can use it
     var self = this;
-    this.tasks = ko.observableArray();
+    self.tasksURI = 'http://localhost:5000/todo/api/v1.0/tasks'
+    self.username = 'xiang'
+    self.password = 'python'
+    self.tasks = ko.observableArray();
 
-    self.tasks([
-        {
-            title: ko.observable('title #1'),
-            description: ko.observable('description #1'),
-            done: ko.observable(false)
-        },
-        {
-            title: ko.observable('title #2'),
-            description: ko.observable('description #2'),
-            done: ko.observable(true)
-        }
-    ]);
+    self.ajax = function(uri, method, data) {
+        var request = {
+            url: uri,
+            type: method,
+            contentType: "application/json",
+            accepts: "application/json",
+            cache: false,
+            dataType: 'json',
+            data: JSON.stringify(data),
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("Authorization",
+                                    "Basic" + btoa(self.username + 
+                                                   ":" + self.password));
+            },
+            error: function(jqXHR) {
+                console.log("ajax error " + jqXHR.status)
+            }
+        };
+
+        return $.ajax(request);
+    }
 
     self.beginAdd = function() {
         alert('Add');
@@ -32,6 +44,17 @@ function TasksViewModel() {
     self.markDone = function(task) {
         task.done(true);
     }
+
+    self.ajax(self.tasksURI, 'GET').done(function(data) {
+        for (var i = 0; i < data.tasks.length; i++) {
+            self.tasks.push({
+                uri: ko.observable(data.tasks[i].uri),
+                title: ko.observable(data.tasks[i].title),
+                description: ko.observable(data.tasks[i].description),
+                done: ko.observable(data.tasks[i].done)
+            });
+        } 
+    });
 }
 
 ko.applyBindings(new TasksViewModel(), $("#main")[0]);
