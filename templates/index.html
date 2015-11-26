@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<head>
+    <title>ToDo API Client Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-debug.js"></script>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-inner"><a class="brand" href="#">ToDo API Client Demo</a></div>
+    </div>
+    <div id="main" class="container">
+        <table class="table table-striped">
+            <tr>
+                <td style="width:1px;"></td>
+                <td><b>Task</b></td>
+                <td><b>Option</b></td>
+            </tr>
+            <!-- ko foreach: tasks -->
+            <tr>
+                <td>
+                    <span data-bind="visible: done" class="label label-success">Done</span>
+                    <span data-bind="visible: !done()" class="label label-important">In Progress</span>
+                </td>
+                <td>
+                    <p><b data-bind="text: title"></b></p>
+                    <p data-bind="text:description"></p>
+                </td>
+                <td>
+                    <button data-bind="click: $parent.beginEdit" class="btn">Edit</button>
+                    <button data-bind="click: $parent.remove" class="btn">Delete</button>
+                    <span data-bind="visible: done">
+                        <button data-bind="click: $parent.markInProgress" class="btn">Mark In Progress</button>
+                    </span>
+                    <span data-bind="visible: !done()">
+                        <button data-bind="click: $parent.markDone" class="btn">Mark Done</button>
+                    </span>
+                </td>
+            </tr>
+            <!-- /ko -->
+        </table>
+        <button data-bind="click: beginAdd" class="btn">Add Task</button>
+    </div>
+    <div id="add" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h3 id="addDialogLabel">Add Task</h3>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal">
+                        <div class="control-group">
+                            <label class="control-label" for="inputTask">Task</label>
+                            <div class="controls">
+                                <input data-bind="value: title" type="text" id="inputTask" placeholder="Task title" style="width: 150px;">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="inputDescription">Description</label>
+                            <div class="controls">
+                                <input data-bind="value: description" type="text" id="inputDescription" placeholder="Description" style="width: 300px;">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button data-bind="click: addTask" class="btn btn-primary">Add Task</button>
+                    <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // js code here!
+    </script>
+    <script src="/static/js/index.js"></script>
+</body>
+</html>

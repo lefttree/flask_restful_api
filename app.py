@@ -3,7 +3,8 @@
 """
 Flask app
 """
-from flask import Flask, jsonify, abort, make_response, request, url_for
+from flask import Flask, jsonify, abort, make_response, request, url_for,\
+    render_template
 from flask.ext.httpauth import HTTPBasicAuth
 
 app = Flask(__name__)
@@ -30,7 +31,7 @@ def index():
     """
     Index page
     """
-    return "Hello, world!"
+    return render_template("./index.html")
 
 
 @app.route('/todo/api/v1.0/tasks', methods=['GET'])
