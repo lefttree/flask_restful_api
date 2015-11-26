@@ -18,7 +18,7 @@ function TasksViewModel() {
             data: JSON.stringify(data),
             beforeSend: function(xhr) {
                 xhr.setRequestHeader("Authorization",
-                                    "Basic" + btoa(self.username + 
+                                    "Basic " + btoa(self.username + 
                                                    ":" + self.password));
             },
             error: function(jqXHR) {
@@ -33,16 +33,35 @@ function TasksViewModel() {
         $("#add").modal('show');
     }
     self.beginEdit = function(task) {
-        alert("Edit: " + task.title());
+        editTaskViewModel.setTask(task);
+        $('#edit').modal('show');
+    }
+    self.edit = function(task, data) {
+        self.ajax(task.uri(), 'PUT', data).done(function(res){
+            self.updateTask(task, res.task);
+        });
+    }
+    self.updateTask = function(task, newTask) {
+        var i = self.tasks.indexOf(task);
+        self.tasks()[i].uri(newTask.uri);
+        self.tasks()[i].title(newTask.title);
+        self.tasks()[i].description(newTask.description);
+        self.tasks()[i].done(newTask.done);
     }
     self.remove = function(task) {
-        alert("Remove: " + task.title());
+        self.ajax(task.uri(), 'DELETE').done(function() {
+            self.tasks.remove(task);
+        });
     }
     self.markInProgress = function(task) {
-        task.done(false);
+        self.ajax(task.uri(), 'PUT', { done: false }).done(function(res) {
+            self.updateTask(task, res.task);
+        });
     }
     self.markDone = function(task) {
-        task.done(true);
+        self.ajax(task.uri(), 'PUT', { done: true }).done(function(res) {
+            self.updateTask(task, res.task);
+        });
     }
 
     self.ajax(self.tasksURI, 'GET').done(function(data) {
@@ -72,6 +91,29 @@ function AddTaskViewModel() {
         self.description("");
     }
 
+}
+
+function EditTaskViewModel() {
+    var self = this;
+    self.title = ko.observable();
+    self.description = ko.observable();
+    self.done = ko.observable();
+
+    self.setTask = function(task) {
+        self.task = task;
+        self.title(task.title());
+        self.description(task.description());
+        self.done(task.done());
+        $('edit').modal('show');
+    }
+    self.editTask = function() {
+        $('#edit').modal('hide');
+        tasksViewModel.edit(self.task, {
+            title: self.title(),
+            description: self.description() ,
+            done: self.done()
+        });
+    }
 }
 
 var tasksViewModel = new TasksViewModel();
